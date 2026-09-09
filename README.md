@@ -98,7 +98,6 @@ python live_trader.py --loop
 engine/             Strategy framework — signals, backtest engine, execution, state
   strategies/       pin.py (the core strategy), momentum.py, beta.py
 monitor/            Data collection — 1m/1h klines, funding history, health checks
-features/           Feature engineering
 tools/              Research utilities — universe metadata, out-of-sample validation
 deploy/             Deployment — dependency setup, history pre-fetch, daemon
 live_trader.py      Live trading loop (signal → risk → execute → settle → persist)

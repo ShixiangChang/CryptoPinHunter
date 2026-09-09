@@ -30,7 +30,6 @@ dependencies = [
 [project.optional-dependencies]
 research = [
     "scipy>=1.10",
-    "lightgbm>=4.0",
 ]
 dev = [
     "pytest>=7.0",

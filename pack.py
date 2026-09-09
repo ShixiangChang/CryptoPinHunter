@@ -15,11 +15,11 @@ OUT = ROOT / "quantum_live.zip"
 # 根目录要打包的文件
 ROOT_FILES = [
     "config.py", "scheduler.py", "status.py", "live_trader.py", "live_status.py",
-    "serve.py", "requirements.txt", "README.md", "CLAUDE.md", "DEPLOY.md",
+    "serve.py", "requirements.txt", "README.md", "DEPLOY.md",
     "LICENSE", ".gitignore",
 ]
 # 要打包的目录（只收 .py / .sh / .conf）
-PACK_DIRS = ["engine", "monitor", "features", "deploy", "tools"]
+PACK_DIRS = ["engine", "monitor", "deploy", "tools"]
 # 定池元数据（三层过滤的运行时输入，服务器开箱即用，无需先联网抓）
 DATA_META_FILES = [
     "data/tradfi_symbols.json",        # TradFi 黑名单（剔除股票/贵金属/ETF 代币）
