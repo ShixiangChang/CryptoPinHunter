@@ -52,8 +52,8 @@ engine/               策略框架
   backtest.py         统一回测引擎（含前视档位强制声明）
   data.py             数据加载（monitor.db 唯一数据源）
   executor.py         币安合约执行层（下单 / 平仓 / 账户，HMAC 签名）
-  state.py / attribution.py / engine
-monitor/              数据采集与监控（行情 / funding / 健康哨兵）
+  state.py / attribution.py / __init__.py
+monitor/              数据采集与监控（行情 / funding / 数据健康检查）
 features/             特征工程（因子计算）
 tools/                研究工具：定池元数据抓取、样本外验证、稳健性测试
 deploy/               部署脚本（依赖安装 / 历史数据预采 / 守护进程）
@@ -121,15 +121,15 @@ python live_trader.py --loop
 - `data/no_spot_symbols.json` — 仅合约无现货名单
 - `data/spot_onboard_dates.json` — 现货上线时间（point-in-time「有现货」判据）
 
-## 科学验证纪律（项目特色）
+## 科学验证纪律
 
 本项目在回测与验证上执行以下纪律，防止「验证」退化成「拟合」：
 
-- 回测输出必须声明【前视】或【无前视】，不标 = 不准输出；
-- 【前视】结果只用于机制筛选（比较开关某变量前后的差值），禁止用于「赚多少」结论；
-- 只有 walk-forward（t 日只用 t 之前数据）+ point-in-time 判据 + 参数样本外的结果才有资格回答「值不值得上真钱」；
+- 回测输出必须声明【前视】或【无前视】档位，未声明不得作为收益结论；
+- 【前视】结果只用于机制筛选（比较开关某变量前后的差值），不得用于「赚多少」结论；
+- 只有 walk-forward（t 日只用 t 之前数据）+ point-in-time 判据 + 参数样本外的结果，才有资格支撑实盘决策；
 - 判定只三档：证实 / 证伪 / 不确定，结论必须落在三态之一；
-- 多重比较需校正（Bonferroni / FDR），结论必须可复现（数据哈希 + 代码版本 + 一条命令重跑）。
+- 多重比较需校正（Bonferroni / FDR）；结论须可复现（数据哈希 + 代码版本 + 一条命令重跑）。
 
 ## 相关文档
 
