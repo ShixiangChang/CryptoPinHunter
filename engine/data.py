@@ -78,7 +78,7 @@ def load_klines(symbols: list[str], interval: str = "1h",
 
 def available_symbols(interval: str = "1h", min_rows: int = 0,
                       start: int | None = None, end: int | None = None) -> list[str]:
-    """该粒度下，K 线行数 >= min_rows 的币（按行数降序）。用于动态确定猎犬 universe。"""
+    """该粒度下，K 线行数 >= min_rows 的币（按行数降序）。用于动态确定策略 universe。"""
     table = _TABLES[interval]
     conn = _conn(table)
     if conn is None:

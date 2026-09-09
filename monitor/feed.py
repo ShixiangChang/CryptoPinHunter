@@ -62,7 +62,7 @@ class DataFeed:
     async def start(self) -> None:
         self._running = True
         self._last_ws_msg_ts = time.time()  # 起跑前记基准，避免看门狗把冷启动误判成断流
-        # 冷启动兜底：先用落盘缓存池订阅一批 symbol，别让 WS 空转等 exchangeInfo。
+        # 冷启动兜底：先用落盘缓存池订阅一批 symbol，避免 WS 等待 exchangeInfo。
         # 这样即使 exchangeInfo 被 418，WS 也能先拿到实时流；ticker 成功后 set_symbols 会覆盖。
         cached = self._cached_symbols_from_db()
         if cached:

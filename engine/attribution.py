@@ -23,7 +23,7 @@ def summarize(trades: list[dict]) -> dict:
 
 
 def should_stop(trades: list[dict], min_n: int = 20, max_dd: float = -0.15) -> bool:
-    """判定某猎犬是否该停：样本够了、期望为负、且累计回撤超阈值 → 停。
+    """判定某策略是否该停：样本够了、期望为负、且累计回撤超阈值 → 停。
 
     - 样本 < min_n：数据不足，先跑着，不下结论。
     - 期望 >= 0：继续。

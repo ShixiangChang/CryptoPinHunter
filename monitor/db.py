@@ -358,7 +358,7 @@ class MonitorDB:
         """拒收/净化的计次台账：脏数据不入库，但「该扔了多少」要留痕。
 
         静默丢弃是 DIY 系统最阴的坑——数据没了却没人知道。这里把每次拒收都记下来，
-        哨兵/日报可汇总，让你知道数据源什么时候开始变脏。
+        日报可汇总数据源状态，便于发现采集异常。
         """
         self._insert(
             "data_quality",
@@ -474,7 +474,7 @@ class MonitorDB:
     def prediction_report_grid(self, z_threshold: float = 1.0) -> dict:
         """多目标 × 多 horizon 的前向对账矩阵：每个 (target, horizon) 的命中率/期望值/样本数。
 
-        吞吐量流水线的核心报告：让多个目标函数、多个周期并行对账，数据告诉我们哪个
+        并行对账多个目标函数与周期，由数据决定哪个
         组合「有效」，而不是事先拍板选唯一。返回 {target: {horizon: {n, hits, win_rate, expectancy}}}。
         """
         with self._lock:

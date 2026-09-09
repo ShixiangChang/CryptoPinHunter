@@ -50,7 +50,7 @@ class StateManager:
 
     @staticmethod
     def strategy(state: dict, name: str) -> dict:
-        """取某猎犬的状态（不存在则初始化）。"""
+        """取某策略的状态（不存在则初始化）。"""
         return state["strategies"].setdefault(name, {
             "nav": 1.0,
             "status": "active",

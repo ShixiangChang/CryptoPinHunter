@@ -2,7 +2,7 @@
 """scheduler.py —— 唯一入口。替代旧版三个各自为政的 --loop。
 
 用法：
-  python scheduler.py --backtest        # 回测三只猎犬，落 backtest_{name}.json
+  python scheduler.py --backtest        # 回测各策略，落 backtest_{name}.json
   python scheduler.py --once            # 跑一次纸面（结算 → 换仓 → 归因 → 推送 → 落盘）
   python scheduler.py --loop            # 常驻：每 LOOP_MINUTES 跑一次纸面
 
@@ -54,7 +54,7 @@ def _display_nav(st: dict, dm: dict) -> float:
 
 
 def paper_step(strat, st: dict, dm: dict, now: int) -> None:
-    """一只猎犬的一步：结算到期/止损仓 → 重算信号换仓。"""
+    """一只策略的一步：结算到期/止损仓 → 重算信号换仓。"""
     hold_sec = strat.hold_hours * 3600
 
     # 1) 结算：止损（做多 close 跌破 stop）+ 到期

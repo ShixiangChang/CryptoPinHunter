@@ -6,7 +6,7 @@
 - "1h"（momentum / beta）：逐 1h bar 推进，止损/到期逐 bar 检查，每 decision_interval_h 重算信号。
 - "1m"（pin）：事件驱动，向量化找触发点，逐个模拟「触发→开仓→持有→到期平仓」。
 
-前视安全：数据一次性加载完整历史，但猎犬内部只取 `open_time <= now` 的切片计算信号。
+前视安全：数据一次性加载完整历史，但策略内部只取 `open_time <= now` 的切片计算信号。
 """
 from __future__ import annotations
 

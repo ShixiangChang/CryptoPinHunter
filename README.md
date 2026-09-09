@@ -72,7 +72,7 @@ pip install -r requirements.txt
 
 # 2. 准备密钥模板（实盘 / 测试网需要；纯回测不需要）
 cp monitor/credentials_example.py monitor/credentials.py
-#    填入你的 Binance API key（只开「合约交易」权限，绝不开「提现」权限）
+#    填入 Binance API key（只授予「合约交易」权限，勿授予「提现」权限）
 
 # 3. 预采数据（定池需要近 90 天成交额、趋势过滤需要 1h、funding 需要 funding_hist）
 bash deploy/fetch_history.sh        # 或手动 python monitor/fetch_1m_monthly.py 等

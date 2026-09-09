@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Strategy 基类：一只猎犬。
+"""Strategy 基类：一只策略。
 
 核心契约只有一个方法 `generate_signals(data, now)`：
 - 回测引擎喂「截至历史决策点 t 的数据」，now = t；
@@ -16,7 +16,7 @@ import pandas as pd
 
 
 class Strategy:
-    name = ""                 # 猎犬名（落库/看板用）
+    name = ""                 # 策略名（落库/看板用）
     interval = "1h"           # 数据粒度："1h" / "1m"
     hold_hours = 96           # 固定持有期（小时），到期重算
     decision_interval_h = 1   # 决策步进（小时）：回测/纸面每隔多久重算一次信号
@@ -42,7 +42,7 @@ class Strategy:
     # ---- 公共工具（子类复用） ----
     @staticmethod
     def slice_upto(data: dict[str, pd.DataFrame], now: int) -> dict[str, pd.DataFrame]:
-        """把每个币的数据切片到 <= now（供猎犬内部按「当时点」计算，避免未来信息）。"""
+        """把每个币的数据切片到 <= now（策略内部按「当时点」计算，避免未来信息）。"""
         out: dict[str, pd.DataFrame] = {}
         for sym, df in data.items():
             s = df[df["open_time"] <= now]

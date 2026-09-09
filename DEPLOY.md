@@ -1,111 +1,83 @@
-# 香港服务器部署清单
+# 部署指南
 
-pin 实盘策略从本地迁移到香港服务器的完整步骤。核心原则：**只迁代码 + 定池元数据，不迁历史数据**（6.6G 的 `monitor.db` 是回测资产，服务器重新采集）。
+在 Linux 服务器上部署本系统（实盘 / 纸面运行）的步骤。
 
----
+## 部署内容与数据
 
-## 一、为什么「历史数据」分两类（迁移前必须分清）
+- 仓库含全部代码、部署脚本、定池元数据（`data/*.json`，已随仓库提供）。
+- **行情数据不随仓库分发**，由部署后的预采步骤从 Binance API 拉取：
+  - 1m K 线（近 3 个月）——插针检测与定池成交额统计
+  - 1h K 线（近 90 天）——趋势过滤（滚动高点）
+  - funding 历史（近 90 天）——funding 过滤
+  - 趋势过滤与 funding 过滤依赖上述历史窗口；未预采就启动，这两个过滤条件无数据可用。
 
-pin 策略用到的「历史数据」有两个完全不同的用途，迁移只带前者：
+## 前置条件
 
-| 用途 | 数据 | 粒度/窗口 | 迁移 |
-|---|---|---|---|
-| **运行时上下文**（策略实时决策的输入） | 1m K 线、1h K 线、funding | 90 天 | ✅ 服务器重新采集（几百 MB） |
-| **回测资产**（验证策略能否赚钱） | `monitor.db` 全量 | 2 年 | ❌ 不迁（6.6G，使命已结束） |
+- Linux 服务器，Python 3.10+
+- 网络可达 Binance API（部分地区需代理，见下文环境变量）
+- 磁盘 ≥ 10G（代码约几 MB + 90 天行情数据约数百 MB + 虚拟环境）
 
-三条过滤条件的运行时数据依赖（缺一个，策略就空转/失效）：
+## 部署步骤
 
-| 过滤条件 | 读的表 | 需要的历史 | 用途 |
-|---|---|---|---|
-| 插针检测 | `klines_1m` | 最近 15 分钟 | 判断「当下是否插针」 |
-| **趋势过滤** | `klines`(1h) | 过去 90 天最高 high | 判断「币是不是阴跌中的僵尸」 |
-| **funding 过滤** | `funding_hist` | 针前最近一次已结算 funding | 判断「砸盘的是不是被强平的杠杆多头」 |
-| 定池 | `klines_1m` | 近 90 天成交额 | 选流动性前 50 + 剔除 TradFi/无现货 |
+### 1. 获取代码
 
-**实时监控 ≠ 不需要历史。** WebSocket/轮询只推「当下」，推不了「过去 90 天」。策略每做一个决策，都要回查 90 天的历史上下文才能判断「这个针是不是错杀」。
-
----
-
-## 二、迁移内容
-
-**带：**
-- 全部代码（`engine/` `monitor/` `tools/` `deploy/` + 根目录 `.py`）
-- 定池元数据（`data/tradfi_symbols.json` `data/spot_onboard_dates.json` `data/spot_base.json`）——三层过滤的输入
-- 部署脚本（`deploy/setup.sh` `fetch_history.sh` `start.sh` `daemon.py`）
-- `requirements.txt` `config.py`
-
-**不带：**
-- `monitor/credentials.py`（密钥，服务器重新填）
-- `monitor.db` 及其 wal/shm（6.6G 回测资产）
-- `.workbuddy/`（内部记忆）、`.git/`、`__pycache__/`、`data/*.csv` `*.html` 快照
-
----
-
-## 三、部署步骤
-
-### 0. 前置条件
-- 香港服务器，Ubuntu 20.04+，Python 3.10+（币安支持香港，直连无 418）
-- 至少 10G 磁盘（代码几 MB + 90 天数据约 300-500MB + venv 约 200MB）
-
-### 1. 本地打包 → 传服务器
 ```bash
-# 本地（Windows，在 quantum 目录）
-python pack.py
-# 生成 ./quantum_live.zip（代码 + 部署脚本 + 定池元数据，不含密钥/数据库）
-```
-上传 `quantum_live.zip` 到服务器（scp / 宝塔 / 任意方式），解压：
-```bash
-unzip quantum_live.zip -d ~/quantum && cd ~/quantum
+git clone <repo-url> && cd <repo-dir>
+# 或解压打包文件：unzip <archive>.zip -d <dir> && cd <dir>
 ```
 
-> 或者走 git：`git push` 后服务器 `git clone`。但注意定池元数据在 `data/*.json`，已改 `.gitignore` 让它们进版本库，两种方式都可。
+### 2. 安装依赖
 
-### 2. 装依赖 + 建目录 + 初始化 secrets
 ```bash
 bash deploy/setup.sh
 ```
 
-### 3. 填密钥（关键）
+### 3. 配置 API 凭据
+
 ```bash
+cp monitor/credentials_example.py monitor/credentials.py
 vi monitor/credentials.py
 ```
-填 `BINANCE_FUTURES_API_KEY` / `BINANCE_FUTURES_API_SECRET`（币安合约 API key）。
-**只开「合约交易」权限，绝不开「提现」权限。**
 
-### 4. 预采 90 天历史上下文（约 5-15 分钟）
+填入 Binance 合约 API key / secret。安全要求：**只授予「合约交易」权限，不要授予「提现」权限。** 该文件已被 .gitignore 排除，不会进入版本库。
+
+### 4. 预采历史数据（首次部署必需）
+
 ```bash
 bash deploy/fetch_history.sh
 ```
-这一步采三类：1m 近 3 个月（定池）、1h 近 90 天（趋势过滤）、funding 近 90 天（funding 过滤）。
-**不跑这步就启动，趋势过滤和 funding 过滤无数据，策略空转。**
 
-### 5. 配置环境变量（决定真钱还是假钱）
+### 5. 配置运行模式（环境变量）
+
 ```bash
-export BINANCE_TESTNET=0    # 0=主网（真钱）；1=测试网（假钱，默认）
-export DRY_RUN=0            # 0=真实下单；1=只记录不下单（默认）
-export LIVE_INITIAL_USDT=10000   # 纸面初始资金（dry_run 用）
-# 香港直连，BINANCE_PROXY 留空（默认就是空）
+export BINANCE_TESTNET=1    # 1=测试网（默认）；0=主网
+export DRY_RUN=1            # 1=纸面，仅记录不下单（默认）；0=真实下单
+export LIVE_INITIAL_USDT=10000   # 纸面模式的初始资金（DRY_RUN=1 时使用）
+export BINANCE_PROXY=       # 直连留空；需要代理时设为 http://host:port
+export DASH_PASS=           # 看板访问密码；非空时启用
 ```
 
+生产环境建议将这些写入 `.env` 文件或 systemd 环境配置，而非交互式 export。
+
 ### 6. 启动
+
 ```bash
-bash deploy/start.sh        # 后台启动（守护 4 进程）
+bash deploy/start.sh        # 后台启动（守护各进程）
 bash deploy/start.sh fg     # 前台调试
 bash deploy/start.sh stop   # 停止
 ```
-看板：`http://服务器IP:8777`（`DASH_PASS` 非空时启用密码，建议公网设密码）
 
----
+状态看板：`http://<server-ip>:8777`（`DASH_PASS` 非空时需密码）。
 
-## 四、启动后验证清单（缺一不可）
+## 启动后验证
 
 ```bash
-# 1. 数据新鲜度（1m 应该在 1 分钟内更新）
+# 1. 1m K 线在持续更新（最新 open_time 距当前 < 60s）
 sqlite3 data/monitor.db "SELECT MAX(open_time) FROM klines_1m;"
 
-# 2. 三张表都有数据
+# 2. 三张核心表都有数据
 sqlite3 data/monitor.db "SELECT 'klines_1m', COUNT(*) FROM klines_1m
-  UNION ALL SELECT 'klines(1h)', COUNT(*) FROM klines
+  UNION ALL SELECT 'klines', COUNT(*) FROM klines
   UNION ALL SELECT 'funding_hist', COUNT(*) FROM funding_hist;"
 
 # 3. 日志无异常
@@ -113,13 +85,11 @@ tail -50 logs/live_feed.log
 tail -50 logs/live_trader.log
 ```
 
-**三个数字都要对：** 1m 新鲜 < 60s、klines(1h) > 0、funding_hist > 0。否则策略在瞎跑。
+数据新鲜度指标：1m 最新时间 < 60s、1h 与 funding 行数 > 0。不达标说明采集未正常工作。
 
----
+## 风控与停止
 
-## 五、回滚 / 止损
-
-- 熔断：权益跌破初始资金 70% 自动暂停（`LIVE_MAX_DRAWDOWN`）
-- 手动停：`bash deploy/start.sh stop`
-- 紧急撤所有单：币安后台手动平仓 + `bash deploy/start.sh stop`
-- 泄露密钥：立刻去币安后台删除重建 key
+- 熔断：权益跌破初始资金的一定比例（`LIVE_MAX_DRAWDOWN`，默认 0.7）自动暂停交易。
+- 手动停止：`bash deploy/start.sh stop`。
+- 紧急处理：先在交易所后台手动平仓，再停止进程。
+- 凭据泄露：立即在交易所后台删除并重建 API key。

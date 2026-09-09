@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""打包脚本：生成可部署的 quantum_live.zip，排除密钥/数据/内部记忆。
+"""打包脚本：生成可部署的 quantum_live.zip，排除凭据与运行时数据。
 
 用法：python pack.py   （在项目根目录运行，输出 ./quantum_live.zip）
 
 含：代码 + 部署脚本 + 定池元数据（tradfi / 现货上线时间）。
-不含：monitor/credentials.py（密钥）、monitor.db（回测资产，目标机重新采集）、.workbuddy/。
+排除：monitor/credentials.py（凭据）、monitor.db 及运行时数据（目标机部署后重新采集）。
 """
 import zipfile
 from pathlib import Path
@@ -27,7 +27,7 @@ DATA_META_FILES = [
     "data/spot_base.json",             # 现货 base 映射（1000 系列前缀归一化）
     "data/onboard_dates.json",         # COIN 上线时间（诊断保留）
 ]
-# 明确排除（密钥 + 缓存 + 内部记忆）
+# 明确排除（凭据 + 缓存 + 运行时数据）
 EXCLUDE = {"monitor/credentials.py"}
 
 count = 0

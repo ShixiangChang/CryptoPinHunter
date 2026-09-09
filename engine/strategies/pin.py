@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Pin 猎犬：插针抄底（liquidation-wick mean reversion）。
+"""Pin 策略：插针抄底（liquidation-wick mean reversion）。
 
 纯规则，两个条件同时满足才算「插针」：
 1. 针尖深：low 相对 15 分钟前 close 跌超 threshold（用 low 捕捉针尖，close 会低估深度）。
@@ -52,7 +52,7 @@ class PinStrategy(Strategy):
     funding_min = float(os.environ.get("PIN_FUNDING_MIN_OVERRIDE", "0.0001"))
     # ↑ funding 下限：> +0.01%（超币安基准）= 多头拥挤 = 可抄的错杀。
     # 环境变量 PIN_FUNDING_MIN_OVERRIDE 可放宽（如 0.0=只要 funding 非负就抄），
-    # 用于中性市场下跑通链路测试——默认 0.01% 在正常市场几乎永远不满足，会导致空转。
+    # 用于中性市场下跑通链路测试；默认 0.01% 在正常市场几乎不会触发（该参数按需覆盖）。
     require_trend_filter = os.environ.get("PIN_REQUIRE_TREND_FILTER", "1") == "1"
     # ↑ 趋势过滤（公允值方向）：跌超阈值 = 趋势性下跌（真相）而非错杀。
     # 环境变量 PIN_REQUIRE_TREND_FILTER=0 可关闭（跑通链路测试用，正式实盘保留）。
