@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crypto-pin-hunter"
+version = "0.1.0"
+description = "Liquidation-wick mean-reversion trading framework for Binance USDT-M perpetual futures"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = ["quantitative-finance", "algorithmic-trading", "binance-futures", "mean-reversion", "crypto"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.24",
+    "requests>=2.28",
+    "aiohttp>=3.9",
+]
+
+[project.optional-dependencies]
+research = [
+    "scipy>=1.10",
+    "lightgbm>=4.0",
+]
+dev = [
+    "pytest>=7.0",
+    "ruff>=0.4",
+]
+
+[tool.setuptools]
+# 模块以脚本/子包方式运行（deploy daemon 直接 python monitor/live_feed.py），
+# 不强制打包为 wheel；此处仅为声明元数据与依赖。
+py-modules = ["config", "live_trader", "live_status", "scheduler", "serve", "status", "pack"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E501"]

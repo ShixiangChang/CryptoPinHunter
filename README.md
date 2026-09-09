@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Platform: Binance USDT-M Futures](https://img.shields.io/badge/platform-Binance%20USDT--M%20Futures-orange.svg)](https://www.binance.com/en/futures)
+[![CI](https://github.com/ShixiangChang/CryptoPinHunter/actions/workflows/ci.yml/badge.svg)](https://github.com/ShixiangChang/CryptoPinHunter/actions/workflows/ci.yml)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ShixiangChang/CryptoPinHunter/pulls)
 
 A research-grade algorithmic trading system for **Binance USDT-M perpetual futures**, built around one idea: liquidation cascades throw prices briefly below fair value — and that dislocation is tradeable.
@@ -105,11 +106,13 @@ live_status.py      Dashboard generator (refreshes every 60s)
 serve.py            Dashboard HTTP server (port 8777)
 scheduler.py        Backtest / paper entry point
 config.py           Central configuration
+tests/              Hermetic unit tests (no network, no live credentials)
 ```
 
 ## Documentation
 
 - **[DEPLOY.md](DEPLOY.md)** — standalone server deployment guide (Ubuntu, setup, verification checklist)
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** — development setup, test discipline, PR guidance
 - **[LICENSE](LICENSE)** — MIT
 
 ## Contributing

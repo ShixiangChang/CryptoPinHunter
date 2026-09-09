@@ -38,3 +38,9 @@ live.env
 
 # 运行输出
 outputs/
+
+# Python 打包产物
+*.egg-info/
+build/
+dist/
+.pytest_cache/

@@ -6,7 +6,7 @@
   python scheduler.py --once            # 跑一次纸面（结算 → 换仓 → 归因 → 推送 → 落盘）
   python scheduler.py --loop            # 常驻：每 LOOP_MINUTES 跑一次纸面
 
-与回测共用同一套 Strategy.generate_signals —— 纸面信号和回测信号是同一只狗。
+与回测共用同一套 Strategy.generate_signals —— 纸面与回测信号同源。
 结算规则（止损价、到期、双边成本）参数都来自 config，与回测引擎一致。
 """
 from __future__ import annotations

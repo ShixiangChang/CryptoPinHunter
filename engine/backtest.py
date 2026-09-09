@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """统一回测引擎：喂历史数据跑 Strategy，产出净值 / Sharpe / 回撤 / 交易流水。
 
-与纸面共用同一套 Strategy.generate_signals —— 回测和纸面是同一只狗。
+与纸面共用同一套 Strategy.generate_signals —— 回测与纸面信号同源。
 两条推进路径，由 strategy.interval 决定：
 - "1h"（momentum / beta）：逐 1h bar 推进，止损/到期逐 bar 检查，每 decision_interval_h 重算信号。
 - "1m"（pin）：事件驱动，向量化找触发点，逐个模拟「触发→开仓→持有→到期平仓」。

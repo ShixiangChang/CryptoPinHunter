@@ -39,11 +39,11 @@ class PinStrategy(Strategy):
     use_low = True           # True=用 low 捕捉针尖 / False=用 close 跌幅（旧版）
     recovery = float(os.environ.get("PIN_RECOVERY_OVERRIDE", "0.01"))
     vol_win = 60             # 量能均线窗口（分钟）
-    vol_mult = 0.0           # 放量倍数；0 = 关闭量能条件（实测有害）
+    vol_mult = 0.0           # 放量倍数；0 = 关闭量能条件
     weight_exp = 2           # 深度平方加权
-    weight_cap = 3.0         # 单币权重上限（× pos）；从 6 降到 3，深度封顶
+    weight_cap = 3.0         # 单币权重上限（× pos）
     pos = 0.05               # 基础仓位
-    stop_buffer = 0.0        # 止损宽度；0=禁用（止损实测有害，默认关）
+    stop_buffer = 0.0        # 止损宽度；0 = 禁用止损
     top_n = 50               # 币池：流动性前 50（待剔除 TradFi + 剔除无现货后重新校准 Calmar 拐点）
     window_days = 90         # 定池滚动窗口：近 90 天成交额（消除全周期前视 + 会换血）
     min_adv = None           # 流动性下限（USD/分钟均额）；None=不启用，靠 top_n 控制
@@ -119,7 +119,7 @@ class PinStrategy(Strategy):
                     continue
             depth = abs(tip_ret) / abs(self.threshold)
             w = min(depth ** self.weight_exp, self.weight_cap) * self.pos
-            # 无价格止损（止损实测有害）；tail risk 靠币池前 50 事前规避
+            # 无价格止损；tail risk 靠币池与趋势过滤事前规避
             stop = None if self.stop_buffer <= 0 else float(low[-1] * (1.0 - self.stop_buffer))
             signals.append({"symbol": sym, "side": 1, "weight": w, "depth": depth,
                             "entry": float(close[-1]), "stop": stop})
